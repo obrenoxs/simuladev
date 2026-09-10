@@ -51,7 +51,7 @@ O projeto nasce de uma lacuna real no mercado de portfólio para devs: falta uma
 
 ## 👤 Autor
 
-Desenvolvido por **Breno Oliveira de Souza**, como projeto de estudo e portfólio no processo de conquista da primeira vaga como desenvolvedor.
+Desenvolvido por **Breno Oliveira de Souza**.
 
 - GitHub: [@obrenoxs](https://github.com/obrenoxs)
 - LinkedIn: [linkedin.com/in/breno-oliveira-souza](https://linkedin.com/in/breno-oliveira-souza)
