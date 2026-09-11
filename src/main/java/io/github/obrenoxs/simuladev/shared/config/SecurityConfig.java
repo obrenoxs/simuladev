@@ -1,4 +1,4 @@
-package io.github.obrenoxs.simuladev.config;
+package io.github.obrenoxs.simuladev.shared.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
