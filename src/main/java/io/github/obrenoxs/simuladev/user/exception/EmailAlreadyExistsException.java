@@ -2,7 +2,7 @@ package io.github.obrenoxs.simuladev.user.exception;
 
 public class EmailAlreadyExistsException extends RuntimeException {
 
-    public EmailAlreadyExistsException(String message) {
-        super(message);
+    public EmailAlreadyExistsException(String email) {
+        super("Já existe um usuário cadastrado com o email: " + email);
     }
 }
