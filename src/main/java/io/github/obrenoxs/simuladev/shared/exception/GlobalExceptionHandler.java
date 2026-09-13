@@ -3,6 +3,7 @@ package io.github.obrenoxs.simuladev.shared.exception;
 import io.github.obrenoxs.simuladev.user.exception.EmailAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -18,6 +19,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleEmailAlreadyExists(EmailAlreadyExistsException ex, WebRequest request) {
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage(), null, request);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex, WebRequest request) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos", null, request);
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(

@@ -14,7 +14,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping(value = "/users")
+@RequestMapping(value = "/api/v1/users")
 public class UserController {
 
     private final UserService userService;
