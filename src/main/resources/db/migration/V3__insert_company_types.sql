@@ -1,0 +1,4 @@
+INSERT INTO company_types (domain_name, description) VALUES
+    ('Banco', 'Instituições financeiras que utilizam tecnologia para desenvolver sistemas bancários, pagamentos, investimentos e outros serviços financeiros. Geralmente possuem processos mais estruturados, regras rígidas e grande preocupação com segurança e confiabilidade.'),
+    ('Startup', 'Empresas que buscam criar e escalar produtos ou serviços inovadores, geralmente com equipes menores e um ambiente mais dinâmico. É comum lidar com mudanças rápidas, novas tecnologias e necessidade de entregar soluções em pouco tempo.'),
+    ('Prestadora de Serviço', 'Empresas de tecnologia que desenvolvem sistemas e soluções para outras empresas, de acordo com as necessidades de cada cliente. O desenvolvedor pode trabalhar em diferentes projetos, tecnologias e setores, adaptando-se às demandas de cada contrato.');
