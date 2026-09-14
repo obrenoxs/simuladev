@@ -26,6 +26,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos", null, request);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> resourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
+    }
+
     private ResponseEntity<Map<String, Object>> buildResponse(
             HttpStatus status, String message, List<Map<String, String>> errors, WebRequest request) {
 

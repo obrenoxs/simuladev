@@ -1,6 +1,7 @@
 package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -39,5 +40,31 @@ public class JwtService {
                 .compact();
 
         return token;
+    }
+
+    public UUID extractUserId(String token) {
+        Claims claims = extractClaims(token);
+
+        String id = claims.getSubject();
+
+       return UUID.fromString(id);
+    }
+
+    public UserRole extractRole(String token) {
+        Claims claims = extractClaims(token);
+
+        String name = claims.get("role", String.class);
+
+        return UserRole.valueOf(name);
+    }
+
+    private Claims extractClaims(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims;
     }
 }
