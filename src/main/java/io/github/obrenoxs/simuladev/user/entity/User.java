@@ -41,16 +41,6 @@ public class User {
         this.password = password;
     }
 
-    public User(String name, String email, String stack, String currentLevel, Integer levelPercentage, UserRole role, String password) {
-        this.name = name;
-        this.email = email;
-        this.stack = stack;
-        this.currentLevel = currentLevel;
-        this.levelPercentage = levelPercentage;
-        this.role = role;
-        this.password = password;
-    }
-
     public UUID getId() {
         return id;
     }
