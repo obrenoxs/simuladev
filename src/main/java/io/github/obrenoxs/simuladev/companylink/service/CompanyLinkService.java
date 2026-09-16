@@ -7,6 +7,7 @@ import io.github.obrenoxs.simuladev.companylink.mapper.CompanyLinkMapper;
 import io.github.obrenoxs.simuladev.companylink.repository.CompanyLinkRepository;
 import io.github.obrenoxs.simuladev.companytype.entity.CompanyType;
 import io.github.obrenoxs.simuladev.companytype.repository.CompanyTypeRepository;
+import io.github.obrenoxs.simuladev.projectstate.service.ProjectStateService;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import io.github.obrenoxs.simuladev.user.repository.UserRepository;
@@ -24,12 +25,18 @@ public class CompanyLinkService {
     private final UserRepository userRepository;
     private final CompanyTypeRepository companyTypeRepository;
     private final CompanyLinkMapper companyLinkMapper;
+    private final ProjectStateService projectStateService;
 
-    public CompanyLinkService(CompanyLinkRepository companyLinkRepository, UserRepository userRepository, CompanyTypeRepository companyTypeRepository, CompanyLinkMapper companyLinkMapper) {
+    public CompanyLinkService(CompanyLinkRepository companyLinkRepository,
+                              UserRepository userRepository,
+                              CompanyTypeRepository companyTypeRepository,
+                              CompanyLinkMapper companyLinkMapper,
+                              ProjectStateService projectStateService) {
         this.companyLinkRepository = companyLinkRepository;
         this.userRepository = userRepository;
         this.companyTypeRepository = companyTypeRepository;
         this.companyLinkMapper = companyLinkMapper;
+        this.projectStateService = projectStateService;
     }
 
     @Transactional
@@ -45,6 +52,8 @@ public class CompanyLinkService {
         CompanyLink companyLink = companyLinkMapper.toEntity(request, user, companyType, date);
 
         companyLink = companyLinkRepository.save(companyLink);
+
+        projectStateService.createEmpty(companyLink);
 
         return companyLinkMapper.toResponse(companyLink);
     }
