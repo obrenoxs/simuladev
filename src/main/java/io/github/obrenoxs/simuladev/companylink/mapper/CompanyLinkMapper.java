@@ -9,12 +9,15 @@ import io.github.obrenoxs.simuladev.user.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import java.time.LocalDate;
+
 @Mapper(componentModel = "spring", uses = CompanyTypeMapper.class)
 public interface CompanyLinkMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", constant = "true")
-    CompanyLink toEntity(CompanyLinkRequest request, User user, CompanyType companyType);
+    @Mapping(target = "startDate", source = "date")
+    CompanyLink toEntity(CompanyLinkRequest request, User user, CompanyType companyType, LocalDate date);
 
     CompanyLinkResponse toResponse(CompanyLink companyLink);
 }

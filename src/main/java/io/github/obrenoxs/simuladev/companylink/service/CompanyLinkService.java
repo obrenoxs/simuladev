@@ -13,6 +13,7 @@ import io.github.obrenoxs.simuladev.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +40,9 @@ public class CompanyLinkService {
         CompanyType companyType = companyTypeRepository.findById(request.companyTypeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Tipo de empresa não encontrado"));
 
-        CompanyLink companyLink = companyLinkMapper.toEntity(request, user, companyType);
+        LocalDate date = LocalDate.now();
+
+        CompanyLink companyLink = companyLinkMapper.toEntity(request, user, companyType, date);
 
         companyLink = companyLinkRepository.save(companyLink);
 
