@@ -1,6 +1,6 @@
 package io.github.obrenoxs.simuladev.concept.dto.response;
 
-import io.github.obrenoxs.simuladev.concept.enums.TaskType;
+import io.github.obrenoxs.simuladev.task.enums.TaskType;
 
 import java.util.Set;
 import java.util.UUID;

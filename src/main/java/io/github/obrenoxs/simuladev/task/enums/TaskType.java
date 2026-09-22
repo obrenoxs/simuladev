@@ -1,4 +1,4 @@
-package io.github.obrenoxs.simuladev.concept.enums;
+package io.github.obrenoxs.simuladev.task.enums;
 
 public enum TaskType {
     FEATURE,

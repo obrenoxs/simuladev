@@ -1,6 +1,6 @@
 package io.github.obrenoxs.simuladev.concept.entity;
 
-import io.github.obrenoxs.simuladev.concept.enums.TaskType;
+import io.github.obrenoxs.simuladev.task.enums.TaskType;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
