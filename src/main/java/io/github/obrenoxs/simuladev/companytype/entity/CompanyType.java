@@ -1,5 +1,6 @@
 package io.github.obrenoxs.simuladev.companytype.entity;
 
+import io.github.obrenoxs.simuladev.concept.entity.Concept;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -13,6 +14,10 @@ public class CompanyType {
     private UUID id;
     private String domainName;
     private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "foundational_concept_id")
+    private Concept foundationalConcept;
 
     public CompanyType() {
     }
@@ -45,5 +50,9 @@ public class CompanyType {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Concept getFoundationalConcept() {
+        return foundationalConcept;
     }
 }
