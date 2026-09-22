@@ -6,6 +6,8 @@ import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.projectstate.entity.ProjectState;
 import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
+import io.github.obrenoxs.simuladev.task.enums.TaskDifficulty;
+import io.github.obrenoxs.simuladev.task.enums.TaskType;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,9 @@ public class TaskEngine {
 
         if (projectState.getState() == null) {
             Concept concept = companyLink.getCompanyType().getFoundationalConcept();
+
+            EngineResult result = new EngineResult(concept, TaskType.FEATURE, concept.getConceptName(), TaskDifficulty.EASY);
+            return result;
         }
 
         return null;
