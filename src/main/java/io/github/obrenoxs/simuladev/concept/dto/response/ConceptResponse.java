@@ -1,5 +1,8 @@
 package io.github.obrenoxs.simuladev.concept.dto.response;
 
+import io.github.obrenoxs.simuladev.concept.enums.TaskType;
+
+import java.util.Set;
 import java.util.UUID;
 
 public record ConceptResponse(
@@ -8,5 +11,7 @@ public record ConceptResponse(
         String category,
         String conceptName,
         Integer weight,
-        String targetLevel
+        String targetLevel,
+        Set<ConceptSummaryResponse> prerequisites,
+        Set<TaskType> taskTypes
 ) {}
