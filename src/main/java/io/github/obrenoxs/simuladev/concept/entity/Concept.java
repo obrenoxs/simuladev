@@ -1,7 +1,10 @@
 package io.github.obrenoxs.simuladev.concept.entity;
 
+import io.github.obrenoxs.simuladev.concept.enums.TaskType;
 import jakarta.persistence.*;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -17,6 +20,23 @@ public class Concept {
     private String conceptName;
     private Integer weight;
     private String targetLevel;
+
+    @ManyToMany
+    @JoinTable(
+            name = "concept_prerequisites",
+            joinColumns = @JoinColumn(name = "concept_id"),
+            inverseJoinColumns = @JoinColumn(name = "prerequisite_id")
+    )
+    private Set<Concept> prerequisites = new HashSet<>();
+
+    @ManyToMany(mappedBy = "prerequisites")
+    private Set<Concept> unlockedConcepts = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "concept_task_types", joinColumns = @JoinColumn(name = "concept_id"))
+    @Column(name = "task_type")
+    @Enumerated(EnumType.STRING)
+    private Set<TaskType> taskTypes = new HashSet<>();
 
     public Concept() {
     }
@@ -76,5 +96,17 @@ public class Concept {
 
     public void setTargetLevel(String targetLevel) {
         this.targetLevel = targetLevel;
+    }
+
+    public Set<Concept> getPrerequisites() {
+        return prerequisites;
+    }
+
+    public Set<Concept> getUnlockedConcepts() {
+        return unlockedConcepts;
+    }
+
+    public Set<TaskType> getTaskTypes() {
+        return taskTypes;
     }
 }
