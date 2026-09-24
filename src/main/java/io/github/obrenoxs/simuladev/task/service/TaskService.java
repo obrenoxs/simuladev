@@ -1,5 +1,6 @@
 package io.github.obrenoxs.simuladev.task.service;
 
+import io.github.obrenoxs.simuladev.ai.service.TicketWriterService;
 import io.github.obrenoxs.simuladev.companylink.entity.CompanyLink;
 import io.github.obrenoxs.simuladev.companylink.service.CompanyLinkService;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
@@ -27,17 +28,20 @@ public class TaskService {
     private final CompanyLinkService companyLinkService;
     private final ProgressConceptService progressConceptService;
     private final ProjectStateService projectStateService;
+    private final TicketWriterService ticketWriterService;
 
     public TaskService(TaskRepository taskRepository,
                        TaskEngine taskEngine,
                        CompanyLinkService companyLinkService,
                        ProgressConceptService progressConceptService,
-                       ProjectStateService projectStateService) {
+                       ProjectStateService projectStateService,
+                       TicketWriterService ticketWriterService) {
         this.taskRepository = taskRepository;
         this.taskEngine = taskEngine;
         this.companyLinkService = companyLinkService;
         this.progressConceptService = progressConceptService;
         this.projectStateService = projectStateService;
+        this.ticketWriterService = ticketWriterService;
     }
 
     public TaskResponse create(UUID companyLinkId, User user) {
@@ -53,7 +57,7 @@ public class TaskService {
         task.setConcept(result.concept());
         task.setDifficulty(result.difficulty());
         task.setType(result.type());
-        task.setTicketText("Ticket a ser gerado pela IA (pendente)");
+        task.setTicketText(ticketWriterService.generateTicket(result, companyLink.getCompanyType()));
 
         task = taskRepository.save(task);
 
