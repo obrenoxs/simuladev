@@ -1,5 +1,6 @@
 package io.github.obrenoxs.simuladev.shared.exception;
 
+import io.github.obrenoxs.simuladev.ai.exception.AiResponseException;
 import io.github.obrenoxs.simuladev.engine.exception.NoEligibleConceptsException;
 import io.github.obrenoxs.simuladev.user.exception.EmailAlreadyExistsException;
 import org.springframework.http.HttpStatus;
@@ -35,6 +36,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoEligibleConceptsException.class)
     public ResponseEntity<Map<String, Object>> noEligibleConcepts(NoEligibleConceptsException ex, WebRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
+    }
+
+    @ExceptionHandler(AiResponseException.class)
+    public ResponseEntity<Map<String, Object>> aiResponse(AiResponseException ex, WebRequest request) {
+        return buildResponse(HttpStatus.BAD_GATEWAY, ex.getMessage(), null, request);
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(
