@@ -1,5 +1,6 @@
 package io.github.obrenoxs.simuladev.shared.exception;
 
+import io.github.obrenoxs.simuladev.engine.exception.NoEligibleConceptsException;
 import io.github.obrenoxs.simuladev.user.exception.EmailAlreadyExistsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> resourceNotFound(ResourceNotFoundException ex, WebRequest request) {
+        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
+    }
+
+    @ExceptionHandler(NoEligibleConceptsException.class)
+    public ResponseEntity<Map<String, Object>> noEligibleConcepts(NoEligibleConceptsException ex, WebRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), null, request);
     }
 
