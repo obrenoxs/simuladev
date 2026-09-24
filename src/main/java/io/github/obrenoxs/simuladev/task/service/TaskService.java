@@ -4,7 +4,9 @@ import io.github.obrenoxs.simuladev.companylink.entity.CompanyLink;
 import io.github.obrenoxs.simuladev.companylink.service.CompanyLinkService;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.service.TaskEngine;
+import io.github.obrenoxs.simuladev.progressconcept.service.ProgressConceptService;
 import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
+import io.github.obrenoxs.simuladev.projectstate.service.ProjectStateService;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.task.dto.response.TaskResponse;
 import io.github.obrenoxs.simuladev.task.entity.Task;
@@ -12,6 +14,7 @@ import io.github.obrenoxs.simuladev.task.enums.TaskStatus;
 import io.github.obrenoxs.simuladev.task.repository.TaskRepository;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,14 +25,19 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final TaskEngine taskEngine;
     private final CompanyLinkService companyLinkService;
+    private final ProgressConceptService progressConceptService;
+    private final ProjectStateService projectStateService;
 
     public TaskService(TaskRepository taskRepository,
                        TaskEngine taskEngine,
                        CompanyLinkService companyLinkService,
-                       ProjectStateRepository projectStateRepository) {
+                       ProgressConceptService progressConceptService,
+                       ProjectStateService projectStateService) {
         this.taskRepository = taskRepository;
         this.taskEngine = taskEngine;
         this.companyLinkService = companyLinkService;
+        this.progressConceptService = progressConceptService;
+        this.projectStateService = projectStateService;
     }
 
     public TaskResponse create(UUID companyLinkId, User user) {
@@ -56,6 +64,7 @@ public class TaskService {
                 task.getCreatedAt());
     }
 
+    @Transactional
     public void deliver(UUID taskId, User user) {
         Task task = taskRepository.findById(taskId)
                 .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada"));
@@ -70,6 +79,9 @@ public class TaskService {
 
         task.setStatus(TaskStatus.DELIVERED);
         task.setDeliveredAt(LocalDateTime.now());
+        taskRepository.save(task);
 
+        progressConceptService.markProgress(user, task.getConcept());
+        projectStateService.deliver(task.getConcept(), task.getCompanyLink());
     }
 }
