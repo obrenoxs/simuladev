@@ -67,6 +67,13 @@ public class CompanyLinkService {
 
     @Transactional(readOnly = true)
     public CompanyLinkResponse findById(UUID id, UUID userId) {
+        CompanyLink companyLink = findEntityById(id, userId);
+
+        return companyLinkMapper.toResponse(companyLink);
+    }
+
+    @Transactional(readOnly = true)
+    public CompanyLink findEntityById(UUID id, UUID userId) {
         CompanyLink companyLink = companyLinkRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vínculo não encontrado"));
 
@@ -74,6 +81,6 @@ public class CompanyLinkService {
             throw new ResourceNotFoundException("Vínculo não encontrado");
         }
 
-        return companyLinkMapper.toResponse(companyLink);
+        return companyLink;
     }
 }
