@@ -22,6 +22,8 @@ public class JwtService {
 
     private SecretKey key;
 
+    public static final int REFRESH_TOKEN_VALIDITY_DAYS = 14;
+
     @PostConstruct
     private void init() {
         key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
@@ -60,7 +62,7 @@ public class JwtService {
 
     public String generateRefreshToken(UUID id) {
         Instant now = Instant.now();
-        Instant expiration = now.plus(Duration.ofDays(14));
+        Instant expiration = now.plus(Duration.ofDays(REFRESH_TOKEN_VALIDITY_DAYS));
 
         String token = Jwts.builder()
                 .subject(id.toString())
