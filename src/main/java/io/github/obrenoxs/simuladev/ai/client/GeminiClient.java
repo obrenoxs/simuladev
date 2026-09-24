@@ -15,7 +15,7 @@ public class GeminiClient {
 
     public GeminiClient() {
         this.restClient = RestClient.builder()
-                .baseUrl("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent")
+                .baseUrl("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent")
                 .build();
     }
 
