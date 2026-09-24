@@ -4,6 +4,7 @@ import io.github.obrenoxs.simuladev.companylink.entity.CompanyLink;
 import io.github.obrenoxs.simuladev.companylink.service.CompanyLinkService;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.service.TaskEngine;
+import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.task.dto.response.TaskResponse;
 import io.github.obrenoxs.simuladev.task.entity.Task;
@@ -22,7 +23,10 @@ public class TaskService {
     private final TaskEngine taskEngine;
     private final CompanyLinkService companyLinkService;
 
-    public TaskService(TaskRepository taskRepository, TaskEngine taskEngine, CompanyLinkService companyLinkService) {
+    public TaskService(TaskRepository taskRepository,
+                       TaskEngine taskEngine,
+                       CompanyLinkService companyLinkService,
+                       ProjectStateRepository projectStateRepository) {
         this.taskRepository = taskRepository;
         this.taskEngine = taskEngine;
         this.companyLinkService = companyLinkService;
