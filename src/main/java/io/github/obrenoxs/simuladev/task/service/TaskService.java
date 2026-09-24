@@ -4,6 +4,7 @@ import io.github.obrenoxs.simuladev.companylink.entity.CompanyLink;
 import io.github.obrenoxs.simuladev.companylink.service.CompanyLinkService;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.service.TaskEngine;
+import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.task.dto.response.TaskResponse;
 import io.github.obrenoxs.simuladev.task.entity.Task;
 import io.github.obrenoxs.simuladev.task.enums.TaskStatus;
@@ -49,5 +50,22 @@ public class TaskService {
                 task.getType(), task.getDifficulty(),
                 task.getTicketText(), task.getStatus(),
                 task.getCreatedAt());
+    }
+
+    public void deliver(UUID taskId, User user) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Tarefa não encontrada"));
+
+        CompanyLink companyLink = task.getCompanyLink();
+
+        UUID userCompanyLinkId = companyLink.getUser().getId();
+
+        if (!userCompanyLinkId.equals(user.getId())) {
+            throw new ResourceNotFoundException("Vínculo não encontrado");
+        }
+
+        task.setStatus(TaskStatus.DELIVERED);
+        task.setDeliveredAt(LocalDateTime.now());
+
     }
 }

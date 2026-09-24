@@ -30,4 +30,12 @@ public class ProgressConceptService {
 
         return progressConcept;
     }
+
+    @Transactional
+    public void markProgress(User user, Concept concept) {
+        ProgressConcept progressConcept = findOrCreate(user, concept);
+        progressConcept.setCovered(true);
+        progressConcept.setRelatedTasks(progressConcept.getRelatedTasks() + 1);
+        progressConceptRepository.save(progressConcept);
+    }
 }
