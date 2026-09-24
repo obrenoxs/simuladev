@@ -44,9 +44,15 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserResponse findById(UUID id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        User user = findByIdEntity(id);
 
         return userMapper.toResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public User findByIdEntity(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado"));
+        return user;
     }
 }
