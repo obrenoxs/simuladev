@@ -58,6 +58,20 @@ public class JwtService {
         return UserRole.valueOf(name);
     }
 
+    public String generateRefreshToken(UUID id) {
+        Instant now = Instant.now();
+        Instant expiration = now.plus(Duration.ofDays(14));
+
+        String token = Jwts.builder()
+                .subject(id.toString())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(key)
+                .compact();
+
+        return token;
+    }
+
     private Claims extractClaims(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(key)
