@@ -6,17 +6,14 @@ import io.github.obrenoxs.simuladev.user.entity.User;
 import io.github.obrenoxs.simuladev.user.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/api/v1/company-links/{companyLinkId}/tasks")
+@RequestMapping(value = "/api/v1/tasks")
 public class TaskController {
 
     private final TaskService taskService;
@@ -27,7 +24,7 @@ public class TaskController {
         this.userService = userService;
     }
 
-    @PostMapping
+    @PostMapping(value = "/company-links/{companyLinkId}")
     public ResponseEntity<TaskResponse> create(@PathVariable UUID companyLinkId, Authentication authentication) {
         Object object = authentication.getPrincipal();
         UUID id = UUID.fromString(object.toString());
@@ -40,5 +37,16 @@ public class TaskController {
                 .buildAndExpand(taskResponse.id()).toUri();
 
         return ResponseEntity.created(uri).body(taskResponse);
+    }
+
+    @PatchMapping(value = "/{taskId}")
+    public ResponseEntity<Void> deliver(@PathVariable UUID taskId, Authentication authentication) {
+        Object object = authentication.getPrincipal();
+        UUID id = UUID.fromString(object.toString());
+
+        User user = userService.findByIdEntity(id);
+
+        taskService.deliver(taskId, user);
+        return ResponseEntity.noContent().build();
     }
 }
