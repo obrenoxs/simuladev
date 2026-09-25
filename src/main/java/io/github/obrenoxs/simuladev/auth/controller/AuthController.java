@@ -2,6 +2,7 @@ package io.github.obrenoxs.simuladev.auth.controller;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
+import io.github.obrenoxs.simuladev.auth.dto.response.RefreshResponse;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.service.AuthService;
 import io.github.obrenoxs.simuladev.auth.service.JwtService;
@@ -40,8 +41,9 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(@CookieValue("refreshToken") String refreshTokenValue) {
+    public ResponseEntity<RefreshResponse> refresh(@CookieValue("refreshToken") String refreshTokenValue) {
         String newAccessToken = authService.refresh(refreshTokenValue);
-        return ResponseEntity.ok(Map.of("token", newAccessToken));
+        RefreshResponse refreshResponse = new RefreshResponse(newAccessToken);
+        return ResponseEntity.ok().body(refreshResponse);
     }
 }
