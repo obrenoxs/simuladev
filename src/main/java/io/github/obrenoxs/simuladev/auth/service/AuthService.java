@@ -11,6 +11,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 public class AuthService {
 
@@ -19,7 +22,10 @@ public class AuthService {
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, RefreshTokenService refreshTokenService) {
+    public AuthService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       JwtService jwtService,
+                       RefreshTokenService refreshTokenService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
@@ -41,5 +47,21 @@ public class AuthService {
         LoginResponse loginResponse = new LoginResponse(user.getId(), token, user.getName());
 
         return new LoginResult(loginResponse, refreshToken);
+    }
+
+    public String refresh(String refreshTokenValue) {
+        String hash = RefreshTokenService.hashToken(refreshTokenValue);
+
+        RefreshToken refreshToken = refreshTokenService.findByHash(hash);
+
+        if (refreshToken.getExpirationDate().isBefore(LocalDateTime.now())) {
+            throw new BadCredentialsException("Acesso expirado, faça login novamente");
+        }
+
+        User user = refreshToken.getUser();
+
+        String accessToken = jwtService.generateToken(user.getId(), user.getRole());
+
+        return accessToken;
     }
 }
