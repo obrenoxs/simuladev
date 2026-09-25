@@ -2,13 +2,19 @@ package io.github.obrenoxs.simuladev.auth.controller;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
+import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.service.AuthService;
+import io.github.obrenoxs.simuladev.auth.service.JwtService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Duration;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
@@ -22,7 +28,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        LoginResponse response = authService.login(request);
-        return ResponseEntity.ok().body(response);
+        LoginResult loginResult = authService.login(request);
+
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", loginResult.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/auth")
+                .maxAge(Duration.ofDays(JwtService.REFRESH_TOKEN_VALIDITY_DAYS))
+                .build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(loginResult.response());
     }
 }
