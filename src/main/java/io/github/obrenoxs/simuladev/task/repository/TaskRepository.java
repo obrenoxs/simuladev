@@ -12,4 +12,6 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
     Optional<Task> findTop1ByCompanyLinkIdOrderByCreatedAtDesc(UUID id);
 
     List<Task> findTop3ByCompanyLinkIdOrderByCreatedAtDesc(UUID id);
+
+    List<Task> findAllByCompanyLinkIdOrderByCreatedAtDesc(UUID companyLinkId);
 }

@@ -6,7 +6,6 @@ import io.github.obrenoxs.simuladev.companylink.service.CompanyLinkService;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.service.TaskEngine;
 import io.github.obrenoxs.simuladev.progressconcept.service.ProgressConceptService;
-import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
 import io.github.obrenoxs.simuladev.projectstate.service.ProjectStateService;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.task.dto.response.TaskResponse;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -61,11 +61,7 @@ public class TaskService {
 
         task = taskRepository.save(task);
 
-        return new TaskResponse(task.getId(),
-                task.getConcept().getConceptName(),
-                task.getType(), task.getDifficulty(),
-                task.getTicketText(), task.getStatus(),
-                task.getCreatedAt());
+        return toResponse(task);
     }
 
     @Transactional
@@ -87,5 +83,26 @@ public class TaskService {
 
         progressConceptService.markProgress(user, task.getConcept());
         projectStateService.deliver(task.getConcept(), task.getCompanyLink());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TaskResponse> findAllTasks(UUID companyLinkId, User user) {
+        companyLinkService.findEntityById(companyLinkId, user.getId());
+
+        List<Task> taskList = taskRepository.findAllByCompanyLinkIdOrderByCreatedAtDesc(companyLinkId);
+        List<TaskResponse> taskListResponse = taskList.stream().map(this::toResponse).toList();
+
+        return taskListResponse;
+    }
+
+    private TaskResponse toResponse(Task task) {
+        TaskResponse taskResponse = new TaskResponse(
+                task.getId(),
+                task.getConcept().getConceptName(),
+                task.getType(), task.getDifficulty(),
+                task.getTicketText(), task.getStatus(),
+                task.getCreatedAt());
+
+        return taskResponse;
     }
 }
