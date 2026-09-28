@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -26,10 +27,7 @@ public class TaskController {
 
     @PostMapping(value = "/company-links/{companyLinkId}")
     public ResponseEntity<TaskResponse> create(@PathVariable UUID companyLinkId, Authentication authentication) {
-        Object object = authentication.getPrincipal();
-        UUID id = UUID.fromString(object.toString());
-
-        User user = userService.findByIdEntity(id);
+        User user = extractUser(authentication);
 
         TaskResponse taskResponse = taskService.create(companyLinkId, user);
 
@@ -41,12 +39,25 @@ public class TaskController {
 
     @PatchMapping(value = "/{taskId}")
     public ResponseEntity<Void> deliver(@PathVariable UUID taskId, Authentication authentication) {
-        Object object = authentication.getPrincipal();
-        UUID id = UUID.fromString(object.toString());
-
-        User user = userService.findByIdEntity(id);
+        User user = extractUser(authentication);
 
         taskService.deliver(taskId, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/company-links/{companyLinkId}")
+    public ResponseEntity<List<TaskResponse>> findAll(@PathVariable UUID companyLinkId, Authentication authentication) {
+        User user = extractUser(authentication);
+
+        List<TaskResponse> taskList = taskService.findAllTasks(companyLinkId, user);
+
+        return ResponseEntity.ok().body(taskList);
+    }
+
+    private User extractUser(Authentication authentication) {
+        Object object = authentication.getPrincipal();
+        UUID id = UUID.fromString(object.toString());
+
+        return userService.findByIdEntity(id); 
     }
 }
