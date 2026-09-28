@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth")
@@ -45,5 +44,20 @@ public class AuthController {
         String newAccessToken = authService.refresh(refreshTokenValue);
         RefreshResponse refreshResponse = new RefreshResponse(newAccessToken);
         return ResponseEntity.ok().body(refreshResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@CookieValue(name = "refreshToken", required = false) String refreshToken) {
+
+        ResponseCookie expiredCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/api/v1/auth")
+                .maxAge(0)
+                .build();
+
+        authService.logout(refreshToken);
+
+        return  ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, expiredCookie.toString()).build();
     }
 }
