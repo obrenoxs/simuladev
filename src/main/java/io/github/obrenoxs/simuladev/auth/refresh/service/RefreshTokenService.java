@@ -5,7 +5,6 @@ import io.github.obrenoxs.simuladev.auth.refresh.repository.RefreshTokenReposito
 import io.github.obrenoxs.simuladev.auth.service.JwtService;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
+import java.util.Optional;
 
 
 @Service
@@ -56,5 +56,13 @@ public class RefreshTokenService {
                 .orElseThrow(() -> new BadCredentialsException("Acesso inválido"));
 
         return refreshToken;
+    }
+
+    @Transactional
+    public void deleteToken(String token) {
+        String hashToken = hashToken(token);
+
+        Optional<RefreshToken> refreshToken = refreshTokenRepository.findByHashToken(hashToken);
+        refreshToken.ifPresent(rt -> refreshTokenRepository.delete(rt));
     }
 }
