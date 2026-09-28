@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -63,5 +62,13 @@ public class AuthService {
         String accessToken = jwtService.generateToken(user.getId(), user.getRole());
 
         return accessToken;
+    }
+
+    public void logout(String refreshToken) {
+        if (refreshToken == null || refreshToken.isBlank()) {
+            return;
+        }
+
+        refreshTokenService.deleteToken(refreshToken);
     }
 }
