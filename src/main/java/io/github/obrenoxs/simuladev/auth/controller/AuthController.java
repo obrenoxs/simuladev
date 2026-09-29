@@ -1,6 +1,7 @@
 package io.github.obrenoxs.simuladev.auth.controller;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
+import io.github.obrenoxs.simuladev.auth.dto.request.ResendVerificationRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
 import io.github.obrenoxs.simuladev.auth.dto.response.RefreshResponse;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
@@ -66,5 +67,11 @@ public class AuthController {
         authService.verifyEmail(token);
         String body = "E-mail verificado com sucesso!";
         return ResponseEntity.ok().body(body);
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<Void> resendVerification(@Valid @RequestBody ResendVerificationRequest email) {
+        authService.resendVerificationEmail(email);
+        return ResponseEntity.noContent().build();
     }
 }

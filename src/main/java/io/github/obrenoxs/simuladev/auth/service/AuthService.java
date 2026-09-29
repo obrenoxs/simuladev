@@ -1,6 +1,7 @@
 package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
+import io.github.obrenoxs.simuladev.auth.dto.request.ResendVerificationRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.email.EmailService;
@@ -93,7 +94,9 @@ public class AuthService {
     }
 
     @Transactional
-    public void resendVerificationEmail(String email) {
+    public void resendVerificationEmail(ResendVerificationRequest emailRequest) {
+        String email = emailRequest.email();
+
         Optional<User> pendingUser = userRepository.findByEmail(email)
                 .filter(user -> !user.isEmailVerified());
 
