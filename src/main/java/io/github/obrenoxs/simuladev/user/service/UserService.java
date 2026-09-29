@@ -1,5 +1,7 @@
 package io.github.obrenoxs.simuladev.user.service;
 
+import io.github.obrenoxs.simuladev.auth.email.EmailService;
+import io.github.obrenoxs.simuladev.auth.service.JwtService;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.user.dto.request.UserRequest;
 import io.github.obrenoxs.simuladev.user.dto.response.UserResponse;
@@ -19,11 +21,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final JwtService jwtService;
+    private final EmailService emailService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, UserMapper userMapper) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder,
+                       UserMapper userMapper,
+                       JwtService jwtService,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
+        this.jwtService = jwtService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -38,6 +48,9 @@ public class UserService {
         User user = userMapper.toEntity(request, encodedPassword);
 
         user = userRepository.save(user);
+
+        String mailToken = jwtService.generateEmailVerificationToken(user.getId());
+        emailService.sendVerificationEmail(user.getEmail(), mailToken);
 
         return userMapper.toResponse(user);
     }
