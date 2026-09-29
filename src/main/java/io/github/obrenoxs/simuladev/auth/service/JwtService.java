@@ -26,6 +26,7 @@ public class JwtService {
     public static final String TOKEN_TYPE_ACCESS = "access";
     public static final String TOKEN_TYPE_REFRESH = "refresh";
     public static final String TOKEN_TYPE_EMAIL_VERIFICATION = "email_verification";
+    public static final int EMAIL_TOKEN_VALIDITY_DAYS = 1;
 
     @PostConstruct
     private void init() {
@@ -79,6 +80,21 @@ public class JwtService {
         String token = Jwts.builder()
                 .subject(id.toString())
                 .claim("type", TOKEN_TYPE_REFRESH)
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
+                .signWith(key)
+                .compact();
+
+        return token;
+    }
+
+    public String generateEmailVerificationToken(UUID id) {
+        Instant now = Instant.now();
+        Instant expiration = now.plus(Duration.ofDays(EMAIL_TOKEN_VALIDITY_DAYS));
+
+        String token = Jwts.builder()
+                .subject(id.toString())
+                .claim("type", TOKEN_TYPE_EMAIL_VERIFICATION)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(key)
