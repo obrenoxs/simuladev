@@ -58,6 +58,6 @@ public class TaskController {
         Object object = authentication.getPrincipal();
         UUID id = UUID.fromString(object.toString());
 
-        return userService.findByIdEntity(id); 
+        return userService.findByIdEntity(id);
     }
 }

@@ -23,6 +23,9 @@ public class JwtService {
     private SecretKey key;
 
     public static final int REFRESH_TOKEN_VALIDITY_DAYS = 14;
+    public static final String TOKEN_TYPE_ACCESS = "access";
+    public static final String TOKEN_TYPE_REFRESH = "refresh";
+    public static final String TOKEN_TYPE_EMAIL_VERIFICATION = "email_verification";
 
     @PostConstruct
     private void init() {
@@ -36,6 +39,7 @@ public class JwtService {
         String token = Jwts.builder()
                 .subject(id.toString())
                 .claim("role", role.name())
+                .claim("type", TOKEN_TYPE_ACCESS)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(key)
@@ -52,6 +56,14 @@ public class JwtService {
        return UUID.fromString(id);
     }
 
+    public String extractType(String token) {
+        Claims claims = extractClaims(token);
+
+        String type = claims.get("type", String.class);
+
+        return type;
+    }
+
     public UserRole extractRole(String token) {
         Claims claims = extractClaims(token);
 
@@ -66,6 +78,7 @@ public class JwtService {
 
         String token = Jwts.builder()
                 .subject(id.toString())
+                .claim("type", TOKEN_TYPE_REFRESH)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(key)

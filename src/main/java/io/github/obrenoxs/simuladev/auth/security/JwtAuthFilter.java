@@ -36,18 +36,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
+
         try {
-            UUID id = jwtService.extractUserId(token);
+            String type = jwtService.extractType(token);
 
-            UserRole role = jwtService.extractRole(token);
+            if (type.equals(JwtService.TOKEN_TYPE_ACCESS)) {
+                UUID id = jwtService.extractUserId(token);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    id,
-                    null,
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
-            );
+                UserRole role = jwtService.extractRole(token);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                        id,
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_" + role.name()))
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
 
         } catch (JwtException | IllegalArgumentException ex) {
 
