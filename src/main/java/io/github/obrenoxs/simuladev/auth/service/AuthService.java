@@ -10,8 +10,10 @@ import io.github.obrenoxs.simuladev.user.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -64,6 +66,22 @@ public class AuthService {
         return accessToken;
     }
 
+    @Transactional
+    public void verifyEmail(String token) {
+        String type = jwtService.extractType(token);
+
+        if (!type.equals(JwtService.TOKEN_TYPE_EMAIL_VERIFICATION)) {
+            throw new BadCredentialsException("Acesso inválido");
+        }
+
+        UUID userId = jwtService.extractUserId(token);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadCredentialsException("Usuário inválido"));
+
+        user.setEmailVerified(true);
+        user = userRepository.save(user);
+    }
+
     public void logout(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return;
@@ -71,4 +89,5 @@ public class AuthService {
 
         refreshTokenService.deleteToken(refreshToken);
     }
+
 }

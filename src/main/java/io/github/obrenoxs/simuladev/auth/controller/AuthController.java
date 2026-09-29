@@ -60,4 +60,11 @@ public class AuthController {
 
         return  ResponseEntity.noContent().header(HttpHeaders.SET_COOKIE, expiredCookie.toString()).build();
     }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestParam(name = "token") String token) {
+        authService.verifyEmail(token);
+        String body = "E-mail verificado com sucesso!";
+        return ResponseEntity.ok().body(body);
+    }
 }

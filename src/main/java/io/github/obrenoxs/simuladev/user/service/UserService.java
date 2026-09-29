@@ -50,6 +50,7 @@ public class UserService {
         user = userRepository.save(user);
 
         String mailToken = jwtService.generateEmailVerificationToken(user.getId());
+
         emailService.sendVerificationEmail(user.getEmail(), mailToken);
 
         return userMapper.toResponse(user);
