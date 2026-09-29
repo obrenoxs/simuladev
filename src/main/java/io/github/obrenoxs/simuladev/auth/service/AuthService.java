@@ -3,6 +3,7 @@ package io.github.obrenoxs.simuladev.auth.service;
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
+import io.github.obrenoxs.simuladev.auth.email.EmailService;
 import io.github.obrenoxs.simuladev.auth.refresh.entity.RefreshToken;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
 import io.github.obrenoxs.simuladev.user.entity.User;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -23,15 +25,18 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       RefreshTokenService refreshTokenService) {
+                       RefreshTokenService refreshTokenService,
+                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.emailService = emailService;
     }
 
     public LoginResult login(LoginRequest request) {
@@ -85,6 +90,22 @@ public class AuthService {
 
         user.setEmailVerified(true);
         user = userRepository.save(user);
+    }
+
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        Optional<User> pendingUser = userRepository.findByEmail(email)
+                .filter(user -> !user.isEmailVerified());
+
+        if (pendingUser.isEmpty()) {
+            return;
+        }
+
+       User user = pendingUser.get();
+
+        String mailToken = jwtService.generateEmailVerificationToken(user.getId());
+
+        emailService.sendVerificationEmail(user.getEmail(), mailToken);
     }
 
     public void logout(String refreshToken) {
