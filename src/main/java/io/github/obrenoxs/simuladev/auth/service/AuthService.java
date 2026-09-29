@@ -6,6 +6,7 @@ import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.refresh.entity.RefreshToken;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
 import io.github.obrenoxs.simuladev.user.entity.User;
+import io.github.obrenoxs.simuladev.user.exception.EmailNotVerifiedException;
 import io.github.obrenoxs.simuladev.user.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +40,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new BadCredentialsException("E-mail ou senha inválidos");
+        }
+
+        if (!user.isEmailVerified()) {
+            throw new EmailNotVerifiedException("Usuário precisa validar o E-mail");
         }
 
         String token = jwtService.generateToken(user.getId(), user.getRole());

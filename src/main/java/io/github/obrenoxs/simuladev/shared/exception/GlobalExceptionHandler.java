@@ -3,6 +3,7 @@ package io.github.obrenoxs.simuladev.shared.exception;
 import io.github.obrenoxs.simuladev.ai.exception.AiResponseException;
 import io.github.obrenoxs.simuladev.engine.exception.NoEligibleConceptsException;
 import io.github.obrenoxs.simuladev.user.exception.EmailAlreadyExistsException;
+import io.github.obrenoxs.simuladev.user.exception.EmailNotVerifiedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -41,6 +42,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AiResponseException.class)
     public ResponseEntity<Map<String, Object>> aiResponse(AiResponseException ex, WebRequest request) {
         return buildResponse(HttpStatus.BAD_GATEWAY, ex.getMessage(), null, request);
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String, Object>> emailNotVerified(EmailNotVerifiedException ex, WebRequest request) {
+        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), null, request);
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(
