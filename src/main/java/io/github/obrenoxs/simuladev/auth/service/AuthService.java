@@ -4,7 +4,7 @@ import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
 import io.github.obrenoxs.simuladev.auth.dto.request.ResendVerificationRequest;
 import io.github.obrenoxs.simuladev.auth.dto.response.LoginResponse;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
-import io.github.obrenoxs.simuladev.auth.email.EmailService;
+import io.github.obrenoxs.simuladev.email.EmailService;
 import io.github.obrenoxs.simuladev.auth.refresh.entity.RefreshToken;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
 import io.github.obrenoxs.simuladev.user.entity.User;

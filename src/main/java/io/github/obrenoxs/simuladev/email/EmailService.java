@@ -1,4 +1,4 @@
-package io.github.obrenoxs.simuladev.auth.email;
+package io.github.obrenoxs.simuladev.email;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;

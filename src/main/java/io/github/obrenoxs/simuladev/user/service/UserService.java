@@ -1,6 +1,6 @@
 package io.github.obrenoxs.simuladev.user.service;
 
-import io.github.obrenoxs.simuladev.auth.email.EmailService;
+import io.github.obrenoxs.simuladev.email.EmailService;
 import io.github.obrenoxs.simuladev.auth.service.JwtService;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
 import io.github.obrenoxs.simuladev.user.dto.request.UserRequest;
