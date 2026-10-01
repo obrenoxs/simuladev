@@ -5,6 +5,7 @@ import io.github.obrenoxs.simuladev.concept.entity.Concept;
 import io.github.obrenoxs.simuladev.concept.repository.ConceptRepository;
 import io.github.obrenoxs.simuladev.engine.exception.NoEligibleConceptsException;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
+import io.github.obrenoxs.simuladev.engine.util.RandomGenerator;
 import io.github.obrenoxs.simuladev.progressconcept.entity.ProgressConcept;
 import io.github.obrenoxs.simuladev.progressconcept.service.ProgressConceptService;
 import io.github.obrenoxs.simuladev.projectstate.entity.ProjectState;
@@ -29,15 +30,18 @@ public class TaskEngine {
     private final ConceptRepository conceptRepository;
     private final ProgressConceptService progressConceptService;
     private final TaskRepository taskRepository;
+    private final RandomGenerator randomGenerator;
 
     public TaskEngine(ProjectStateRepository projectStateRepository,
                       ConceptRepository conceptRepository,
                       ProgressConceptService progressConceptService,
-                      TaskRepository taskRepository) {
+                      TaskRepository taskRepository,
+                      RandomGenerator randomGenerator) {
         this.projectStateRepository = projectStateRepository;
         this.conceptRepository = conceptRepository;
         this.progressConceptService = progressConceptService;
         this.taskRepository = taskRepository;
+        this.randomGenerator = randomGenerator;
     }
 
     public EngineResult nextTask(User user, CompanyLink companyLink) {
@@ -71,7 +75,7 @@ public class TaskEngine {
                     .mapToDouble(entry -> entry.getValue())
                     .sum();
 
-            double draw = Math.random() * totalScore;
+            double draw = randomGenerator.nextDouble() * totalScore;
 
             double accumulated = 0.0;
             Concept selected = null;
