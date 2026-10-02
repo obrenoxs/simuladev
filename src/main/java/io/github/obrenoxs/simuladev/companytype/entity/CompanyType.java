@@ -55,4 +55,8 @@ public class CompanyType {
     public Concept getFoundationalConcept() {
         return foundationalConcept;
     }
+
+    public void setFoundationalConcept(Concept foundationalConcept) {
+        this.foundationalConcept = foundationalConcept;
+    }
 }
