@@ -150,4 +150,37 @@ public class TaskEngineTest {
         Assertions.assertEquals(TaskType.FEATURE, result.type());
         Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
     }
+
+    @Test
+    void nextTaskShouldReturnConceptBWhenDrawFavorsConceptB() {
+
+        projectState.setState(new HashMap<>());
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptA, conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(progressConceptService.findOrCreate(user, conceptB))
+                .thenReturn(progressB);
+
+        when(taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(List.of());
+
+        when(taskRepository.findTop1ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(Optional.empty());
+
+        when(randomGenerator.nextDouble())
+                .thenReturn(0.8);
+
+        EngineResult result = taskEngine.nextTask(user, companyLink);
+
+        Assertions.assertEquals(conceptB, result.concept());
+        Assertions.assertEquals(TaskType.FEATURE, result.type());
+        Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
+    }
 }
