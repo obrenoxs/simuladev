@@ -205,4 +205,40 @@ public class TaskEngineTest {
             EngineResult result = taskEngine.nextTask(user, companyLink);
         });
     }
+
+    @Test
+    void nextTaskShouldReturnConceptWhenPreRequisiteIsCovered() {
+
+        projectState.setState(new HashMap<>());
+
+        conceptB.getPrerequisites().add(conceptA);
+        progressA.setCovered(true);
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(progressConceptService.findOrCreate(user, conceptB))
+                .thenReturn(progressB);
+
+        when(taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(List.of());
+
+        when(randomGenerator.nextDouble())
+                .thenReturn(0.5);
+
+        when(taskRepository.findTop1ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(Optional.empty());
+
+        EngineResult result = taskEngine.nextTask(user, companyLink);
+
+        Assertions.assertEquals(conceptB, result.concept());
+        Assertions.assertEquals(TaskType.FEATURE, result.type());
+        Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
+    }
 }
