@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -240,5 +241,37 @@ public class TaskEngineTest {
         Assertions.assertEquals(conceptB, result.concept());
         Assertions.assertEquals(TaskType.FEATURE, result.type());
         Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
+    }
+
+    @Test
+    void nextTaskShouldThrowNoEligibleConceptsWhenOnlyOnePrerequisiteIsCovered() {
+
+        projectState.setState(new HashMap<>());
+
+        Concept conceptC = new Concept(UUID.randomUUID(), "Java + Spring", "Segurança", "Autenticação JWT", 5, "ESTAGIARIO");
+        ProgressConcept progressC = new ProgressConcept(UUID.randomUUID(), false, 0, user, conceptC);
+
+        conceptB.getPrerequisites().add(conceptA);
+        conceptB.getPrerequisites().add(conceptC);
+        progressA.setCovered(true);
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(progressConceptService.findOrCreate(user, conceptC))
+                .thenReturn(progressC);
+
+        lenient().when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        Assertions.assertThrows(NoEligibleConceptsException.class, () -> {
+            EngineResult result = taskEngine.nextTask(user, companyLink);
+        });
     }
 }
