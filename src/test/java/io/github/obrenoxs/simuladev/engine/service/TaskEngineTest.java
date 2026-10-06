@@ -6,6 +6,7 @@ import io.github.obrenoxs.simuladev.concept.entity.Concept;
 import io.github.obrenoxs.simuladev.concept.repository.ConceptRepository;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.util.RandomGenerator;
+import io.github.obrenoxs.simuladev.progressconcept.entity.ProgressConcept;
 import io.github.obrenoxs.simuladev.progressconcept.service.ProgressConceptService;
 import io.github.obrenoxs.simuladev.projectstate.entity.ProjectState;
 import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
@@ -24,6 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,6 +60,12 @@ public class TaskEngineTest {
     private CompanyLink companyLink;
     private ProjectState projectState;
 
+    private Concept conceptA;
+    private Concept conceptB;
+
+    private ProgressConcept progressA;
+    private ProgressConcept progressB;
+
     @BeforeEach
     void setUp() throws Exception {
         foundationalConcept = new Concept(
@@ -74,6 +83,15 @@ public class TaskEngineTest {
         user = new User(UUID.randomUUID(), "UserTest", "userTest@example.com", "Java + Spring", "ESTAGIARIO", 0, UserRole.USER, "12345678");
         companyLink = new CompanyLink(UUID.randomUUID(), "Test Company", LocalDate.now(), true, user, companyType);
         projectState = new ProjectState(UUID.randomUUID(), null, companyLink);
+
+        conceptA = new Concept(UUID.randomUUID(), "Java + Spring", "Persistência", "Query method Spring Data", 6, "ESTAGIARIO");
+        conceptA.getTaskTypes().add(TaskType.FEATURE);
+
+        conceptB = new Concept(UUID.randomUUID(), "Java + Spring", "Validação", "Bean Validation", 4, "ESTAGIARIO");
+        conceptB.getTaskTypes().add(TaskType.FEATURE);
+
+        progressA = new ProgressConcept(UUID.randomUUID(), false, 0, user, conceptA);
+        progressB = new ProgressConcept(UUID.randomUUID(), false, 0, user, conceptB);
     }
 
     @Test
@@ -98,5 +116,38 @@ public class TaskEngineTest {
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             EngineResult result = taskEngine.nextTask(user, companyLink);
         });
+    }
+
+    @Test
+    void nextTaskShouldReturnConceptAWhenDrawFavorsConceptA() {
+
+        projectState.setState(new HashMap<>());
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptA, conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(progressConceptService.findOrCreate(user, conceptB))
+                .thenReturn(progressB);
+
+        when(taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(List.of());
+
+        when(taskRepository.findTop1ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(Optional.empty());
+
+        when(randomGenerator.nextDouble())
+                .thenReturn(0.3);
+
+        EngineResult result = taskEngine.nextTask(user, companyLink);
+
+        Assertions.assertEquals(conceptA, result.concept());
+        Assertions.assertEquals(TaskType.FEATURE, result.type());
+        Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
     }
 }
