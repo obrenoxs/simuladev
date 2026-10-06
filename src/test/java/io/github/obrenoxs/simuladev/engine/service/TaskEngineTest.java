@@ -4,6 +4,7 @@ import io.github.obrenoxs.simuladev.companylink.entity.CompanyLink;
 import io.github.obrenoxs.simuladev.companytype.entity.CompanyType;
 import io.github.obrenoxs.simuladev.concept.entity.Concept;
 import io.github.obrenoxs.simuladev.concept.repository.ConceptRepository;
+import io.github.obrenoxs.simuladev.engine.exception.NoEligibleConceptsException;
 import io.github.obrenoxs.simuladev.engine.result.EngineResult;
 import io.github.obrenoxs.simuladev.engine.util.RandomGenerator;
 import io.github.obrenoxs.simuladev.progressconcept.entity.ProgressConcept;
@@ -182,5 +183,26 @@ public class TaskEngineTest {
         Assertions.assertEquals(conceptB, result.concept());
         Assertions.assertEquals(TaskType.FEATURE, result.type());
         Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
+    }
+
+    @Test
+    void nextTaskShouldReturnNoEligibleConceptsExceptionWhenNoConceptIsEligible() {
+
+        projectState.setState(new HashMap<>());
+
+        conceptB.getPrerequisites().add(conceptA);
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        Assertions.assertThrows(NoEligibleConceptsException.class, () -> {
+            EngineResult result = taskEngine.nextTask(user, companyLink);
+        });
     }
 }
