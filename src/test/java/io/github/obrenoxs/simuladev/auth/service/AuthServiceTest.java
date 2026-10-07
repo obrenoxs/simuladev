@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,5 +61,23 @@ public class AuthServiceTest {
         Assertions.assertThrows(BadCredentialsException.class, () -> {
             LoginResult result = authService.login(request);
         });
+
+        verifyNoInteractions(passwordEncoder);
+    }
+
+    @Test
+    void loginShouldReturnBadCredentialsExceptionWhenPasswordIsWrong() {
+
+        when(userRepository.findByEmail("userTest@example.com"))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("12345678", "hashDaSenha"))
+                .thenReturn(false);
+
+        Assertions.assertThrows(BadCredentialsException.class, () -> {
+            LoginResult result = authService.login(request);
+        });
+
+        verifyNoInteractions(jwtService, refreshTokenService);
     }
 }
