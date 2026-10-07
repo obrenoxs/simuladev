@@ -20,8 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -116,5 +115,30 @@ public class AuthServiceTest {
         });
 
         verifyNoInteractions(jwtService, refreshTokenService);
+    }
+
+    @Test
+    void loginShouldReturnTokensWhenCredentialsIsAreValidAndEmailIsVerified() {
+
+        when(userRepository.findByEmail("userTest@example.com"))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("12345678", "hashDaSenha"))
+                .thenReturn(true);
+
+        when(jwtService.generateToken(user.getId(), user.getRole()))
+                .thenReturn("access-token");
+
+        when(refreshTokenService.create(user))
+                .thenReturn("refresh-token");
+
+        LoginResult result = authService.login(request);
+
+        Assertions.assertEquals(result.refreshToken(), "refresh-token");
+        Assertions.assertEquals(result.response().token(), "access-token");
+        Assertions.assertEquals(result.response().id(), user.getId());
+        Assertions.assertEquals(result.response().name(), user.getName());
+
+        verify(refreshTokenService).create(user);
     }
 }
