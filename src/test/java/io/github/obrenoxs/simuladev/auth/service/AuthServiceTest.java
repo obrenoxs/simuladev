@@ -67,7 +67,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void loginShouldBadCredentialsExceptionWhenPasswordIsWrong() {
+    void loginShouldThrowBadCredentialsExceptionWhenPasswordIsWrong() {
 
         when(userRepository.findByEmail("userTest@example.com"))
                 .thenReturn(Optional.of(user));
@@ -96,5 +96,25 @@ public class AuthServiceTest {
         Assertions.assertThrows(EmailNotVerifiedException.class, () -> {
             LoginResult result = authService.login(request);
         });
+
+        verifyNoInteractions(jwtService, refreshTokenService);
+    }
+
+    @Test
+    void loginShouldThrowBadCredentialsExceptionWhenPasswordIsWrongAndEmailNotVerified() {
+
+        user.setEmailVerified(false);
+
+        when(userRepository.findByEmail("userTest@example.com"))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("12345678", "hashDaSenha"))
+                .thenReturn(false);
+
+        Assertions.assertThrows(BadCredentialsException.class, () -> {
+            LoginResult result = authService.login(request);
+        });
+
+        verifyNoInteractions(jwtService, refreshTokenService);
     }
 }
