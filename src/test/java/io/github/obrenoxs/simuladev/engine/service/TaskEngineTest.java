@@ -311,4 +311,38 @@ public class TaskEngineTest {
         Assertions.assertEquals(TaskType.FEATURE, result.type());
         Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
     }
+
+    @Test
+    void nextTaskShouldChooseBugFixWhenLastTaskWasFeature() {
+
+        projectState.setState(new HashMap<>());
+
+        conceptA.getTaskTypes().add(TaskType.BUGFIX);
+
+        Task lastTask = new Task();
+        lastTask.setType(TaskType.FEATURE);
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptA));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(List.of());
+
+        when(randomGenerator.nextDouble())
+                .thenReturn(0.5);
+
+        when(taskRepository.findTop1ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(Optional.of(lastTask));
+
+        EngineResult result = taskEngine.nextTask(user, companyLink);
+
+        Assertions.assertEquals(conceptA, result.concept());
+        Assertions.assertEquals(TaskType.BUGFIX, result.type());
+    }
 }
