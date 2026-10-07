@@ -12,6 +12,7 @@ import io.github.obrenoxs.simuladev.progressconcept.service.ProgressConceptServi
 import io.github.obrenoxs.simuladev.projectstate.entity.ProjectState;
 import io.github.obrenoxs.simuladev.projectstate.repository.ProjectStateRepository;
 import io.github.obrenoxs.simuladev.shared.exception.ResourceNotFoundException;
+import io.github.obrenoxs.simuladev.task.entity.Task;
 import io.github.obrenoxs.simuladev.task.enums.TaskDifficulty;
 import io.github.obrenoxs.simuladev.task.enums.TaskType;
 import io.github.obrenoxs.simuladev.task.repository.TaskRepository;
@@ -273,5 +274,41 @@ public class TaskEngineTest {
         Assertions.assertThrows(NoEligibleConceptsException.class, () -> {
             EngineResult result = taskEngine.nextTask(user, companyLink);
         });
+    }
+
+    @Test
+    void nextTaskShouldPreferConceptBWhenConceptAAppearedRecently() {
+
+        projectState.setState(new HashMap<>());
+
+        Task recentTask = new Task();
+        recentTask.setConcept(conceptA);
+
+        when(projectStateRepository.findByCompanyLinkId(companyLink.getId()))
+                .thenReturn(Optional.of(projectState));
+
+        when(conceptRepository.findAllByStackAndTargetLevel(user.getStack(), user.getCurrentLevel()))
+                .thenReturn(List.of(conceptA, conceptB));
+
+        when(progressConceptService.findOrCreate(user, conceptA))
+                .thenReturn(progressA);
+
+        when(progressConceptService.findOrCreate(user, conceptB))
+                .thenReturn(progressB);
+
+        when(taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(List.of(recentTask));
+
+        when(randomGenerator.nextDouble())
+                .thenReturn(0.3);
+
+        when(taskRepository.findTop1ByCompanyLinkIdOrderByCreatedAtDesc(companyLink.getId()))
+                .thenReturn(Optional.empty());
+
+        EngineResult result = taskEngine.nextTask(user, companyLink);
+
+        Assertions.assertEquals(conceptB, result.concept());
+        Assertions.assertEquals(TaskType.FEATURE, result.type());
+        Assertions.assertEquals(TaskDifficulty.MEDIUM, result.difficulty());
     }
 }
