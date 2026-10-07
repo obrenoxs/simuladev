@@ -5,6 +5,7 @@ import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
+import io.github.obrenoxs.simuladev.user.exception.EmailNotVerifiedException;
 import io.github.obrenoxs.simuladev.user.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -66,7 +67,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void loginShouldReturnBadCredentialsExceptionWhenPasswordIsWrong() {
+    void loginShouldBadCredentialsExceptionWhenPasswordIsWrong() {
 
         when(userRepository.findByEmail("userTest@example.com"))
                 .thenReturn(Optional.of(user));
@@ -79,5 +80,21 @@ public class AuthServiceTest {
         });
 
         verifyNoInteractions(jwtService, refreshTokenService);
+    }
+
+    @Test
+    void loginShouldThrowEmailNotVerifiedExceptionWhenPasswordIsCorrectButEmailNotVerified() {
+
+        user.setEmailVerified(false);
+
+        when(userRepository.findByEmail("userTest@example.com"))
+                .thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("12345678", "hashDaSenha"))
+                .thenReturn(true);
+
+        Assertions.assertThrows(EmailNotVerifiedException.class, () -> {
+            LoginResult result = authService.login(request);
+        });
     }
 }
