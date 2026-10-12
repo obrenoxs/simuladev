@@ -2,6 +2,7 @@ package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
+import io.github.obrenoxs.simuladev.auth.refresh.entity.RefreshToken;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -118,7 +120,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void loginShouldReturnTokensWhenCredentialsIsAreValidAndEmailIsVerified() {
+    void loginShouldReturnTokensWhenCredentialsAreValidAndEmailIsVerified() {
 
         when(userRepository.findByEmail("userTest@example.com"))
                 .thenReturn(Optional.of(user));
@@ -140,5 +142,22 @@ public class AuthServiceTest {
         Assertions.assertEquals(result.response().name(), user.getName());
 
         verify(refreshTokenService).create(user);
+    }
+
+    @Test
+    void refreshShouldReturnThrowBadCredentialsExceptionWhenTokenIsExpired() {
+
+        String rawToken = "raw-refresh-token";
+        String hash = RefreshTokenService.hashToken(rawToken);
+        RefreshToken storedToken = new RefreshToken(UUID.randomUUID(), user, hash, LocalDateTime.now().minusDays(1));
+
+        when(refreshTokenService.findByHash(hash))
+                .thenReturn(storedToken);
+
+        Assertions.assertThrows(BadCredentialsException.class, () -> {
+            authService.refresh(rawToken);
+        });
+
+        verifyNoInteractions(jwtService);
     }
 }
