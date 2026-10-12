@@ -193,4 +193,25 @@ public class AuthServiceTest {
 
         verifyNoInteractions(userRepository);
     }
+
+    @Test
+    void verifyEmailShouldThrowBadCredentialsExceptionWhenUserNoLongerExists() {
+
+        String token = "any-token";
+
+        when(jwtService.extractType(token))
+                .thenReturn(JwtService.TOKEN_TYPE_EMAIL_VERIFICATION);
+
+        when(jwtService.extractUserId(token))
+                .thenReturn(user.getId());
+
+        when(userRepository.findById(user.getId()))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(BadCredentialsException.class, () -> {
+                authService.verifyEmail("any-token");
+        });
+
+        verify(userRepository, never()).save(any());
+    }
 }
