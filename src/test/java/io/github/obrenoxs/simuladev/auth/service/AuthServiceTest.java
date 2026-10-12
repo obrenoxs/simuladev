@@ -214,4 +214,28 @@ public class AuthServiceTest {
 
         verify(userRepository, never()).save(any());
     }
+
+    @Test
+    void verifyEmailShouldMarkUserAsVerifiedWhenTokenIsValid() {
+
+        user.setEmailVerified(false);
+        String token = "any-token";
+
+        when(jwtService.extractType(token))
+                .thenReturn(JwtService.TOKEN_TYPE_EMAIL_VERIFICATION);
+
+        when(jwtService.extractUserId(token))
+                .thenReturn(user.getId());
+
+        when(userRepository.findById(user.getId()))
+                .thenReturn(Optional.of(user));
+
+        when(userRepository.save(user))
+                .thenReturn(user);
+
+        authService.verifyEmail("any-token");
+
+        Assertions.assertTrue(user.isEmailVerified());
+        verify(userRepository).save(user);
+    }
 }
