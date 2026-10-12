@@ -145,7 +145,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    void refreshShouldReturnThrowBadCredentialsExceptionWhenTokenIsExpired() {
+    void refreshShouldThrowBadCredentialsExceptionWhenTokenIsExpired() {
 
         String rawToken = "raw-refresh-token";
         String hash = RefreshTokenService.hashToken(rawToken);
@@ -159,5 +159,25 @@ public class AuthServiceTest {
         });
 
         verifyNoInteractions(jwtService);
+    }
+
+    @Test
+    void refreshShouldReturnNewAccessTokenWhenTokenIsValid() {
+
+        String rawToken = "raw-refresh-token";
+        String hash = RefreshTokenService.hashToken(rawToken);
+        RefreshToken storedToken = new RefreshToken(UUID.randomUUID(), user, hash, LocalDateTime.now().plusDays(1));
+
+        when(refreshTokenService.findByHash(hash))
+                .thenReturn(storedToken);
+
+
+        when(jwtService.generateToken(user.getId(), user.getRole()))
+                .thenReturn("new-access-token");
+
+        String refreshToken = authService.refresh(rawToken);
+
+        Assertions.assertEquals("new-access-token", refreshToken);
+        verify(jwtService).generateToken(user.getId(), user.getRole());
     }
 }
