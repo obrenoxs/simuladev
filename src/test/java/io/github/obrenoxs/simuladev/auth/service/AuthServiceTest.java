@@ -180,4 +180,17 @@ public class AuthServiceTest {
         Assertions.assertEquals("new-access-token", refreshToken);
         verify(jwtService).generateToken(user.getId(), user.getRole());
     }
+
+    @Test
+    void verifyEmailShouldThrowBadCredentialsExceptionWhenTokenTypeIsNotEmailVerification() {
+
+        when(jwtService.extractType("any-token"))
+                .thenReturn(JwtService.TOKEN_TYPE_ACCESS);
+
+        Assertions.assertThrows(BadCredentialsException.class, () -> {
+            authService.verifyEmail("any-token");
+        });
+
+        verifyNoInteractions(userRepository);
+    }
 }
