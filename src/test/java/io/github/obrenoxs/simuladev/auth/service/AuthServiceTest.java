@@ -233,9 +233,37 @@ public class AuthServiceTest {
         when(userRepository.save(user))
                 .thenReturn(user);
 
-        authService.verifyEmail("any-token");
+        authService.verifyEmail(token);
 
         Assertions.assertTrue(user.isEmailVerified());
         verify(userRepository).save(user);
+    }
+
+    @Test
+    void logoutShouldDoNothingWhenTokenIsNull() {
+
+        authService.logout(null);
+
+        verifyNoInteractions(refreshTokenService);
+    }
+
+    @Test
+    void logoutShouldDoNothingWhenTokenIsBlank() {
+
+        String refreshToken = "";
+
+        authService.logout(refreshToken);
+
+        verifyNoInteractions(refreshTokenService);
+    }
+
+    @Test
+    void logoutShouldDeleteTokenWhenTokenIsPresent() {
+
+        String refreshToken = "any-token";
+
+        authService.logout(refreshToken);
+
+        verify(refreshTokenService).deleteToken(refreshToken);
     }
 }
