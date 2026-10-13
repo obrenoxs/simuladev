@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import javax.crypto.SecretKey;
 import java.time.Duration;
@@ -17,6 +18,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -75,6 +77,29 @@ public class ConceptControllerIT extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/v1/concepts")
                         .header("Authorization", "Bearer " + expiredToken))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void protectedRequestShouldNotCreateSessionWhenTokenIsMissing() throws Exception {
+
+        MvcResult result = mockMvc.perform(get("/api/v1/concepts"))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        assertNull(result.getRequest().getSession(false));
+    }
+
+    @Test
+    void protectedRequestShouldNotCreateSessionWhenTokenIsValid() throws Exception {
+
+        String token = jwtService.generateToken(UUID.randomUUID(), UserRole.USER);
+
+        MvcResult result = mockMvc.perform(get("/api/v1/concepts")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertNull(result.getRequest().getSession(false));
     }
 
     private String buildAccessToken(Date expiration) {
