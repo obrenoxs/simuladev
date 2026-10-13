@@ -1,6 +1,7 @@
 package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,8 +28,42 @@ public class JwtServiceTest {
 
         String token = jwtService.generateToken(id, UserRole.USER);
 
-        Assertions.assertEquals(jwtService.extractUserId(token), id);
-        Assertions.assertEquals(jwtService.extractRole(token), UserRole.USER);
-        Assertions.assertEquals(jwtService.extractType(token), JwtService.TOKEN_TYPE_ACCESS);
+        Assertions.assertEquals(id, jwtService.extractUserId(token));
+        Assertions.assertEquals(UserRole.USER, jwtService.extractRole(token));
+        Assertions.assertEquals(JwtService.TOKEN_TYPE_ACCESS, jwtService.extractType(token));
+    }
+
+    @Test
+    void generateRefreshTokenShouldProduceTokenWithUserIdAndRefreshType() {
+
+        UUID id = UUID.randomUUID();
+
+        String token = jwtService.generateRefreshToken(id);
+
+        Assertions.assertEquals(id, jwtService.extractUserId(token));
+        Assertions.assertEquals(JwtService.TOKEN_TYPE_REFRESH, jwtService.extractType(token));
+    }
+
+    @Test
+    void extractUserIdShouldThrowJwtExceptionWhenTokenIsTampered() {
+
+        UUID id = UUID.randomUUID();
+
+        String token = jwtService.generateToken(id, UserRole.USER);
+
+        String[] parts = token.split("\\.");
+
+        char original = parts[2].charAt(0);
+        char replacement = original == 'A' ? 'B' : 'A';
+
+        parts[2] = replacement + parts[2].substring(1);
+
+        String tamperedToken = String.join(".", parts);
+
+        Assertions.assertEquals(id, jwtService.extractUserId(token));
+
+        Assertions.assertThrows(JwtException.class, () -> {
+            jwtService.extractUserId(tamperedToken);
+        });
     }
 }
