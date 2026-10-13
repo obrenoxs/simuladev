@@ -1,7 +1,6 @@
 package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -14,7 +13,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.crypto.SecretKey;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -88,6 +86,10 @@ public class JwtServiceTest {
 
         String token = buildToken(otherKey, Date.from(Instant.now().plus(Duration.ofHours(1))));
 
+        String validToken = buildToken(serviceKey, Date.from(Instant.now().plus(Duration.ofHours(1))));
+
+        Assertions.assertDoesNotThrow(() -> jwtService.extractUserId(validToken));
+
         Assertions.assertThrows(JwtException.class, () -> {
             jwtService.extractUserId(token);
         });
@@ -99,6 +101,10 @@ public class JwtServiceTest {
         SecretKey serviceKey = Keys.hmacShaKeyFor(SECRET.getBytes());
 
         String token = buildToken(serviceKey, Date.from(Instant.now().minus(Duration.ofHours(1))));
+
+        String validToken = buildToken(serviceKey, Date.from(Instant.now().plus(Duration.ofHours(1))));
+
+        Assertions.assertDoesNotThrow(() -> jwtService.extractUserId(validToken));
 
         Assertions.assertThrows(ExpiredJwtException.class, () -> {
             jwtService.extractUserId(token);
