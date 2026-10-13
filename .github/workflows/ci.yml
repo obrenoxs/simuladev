@@ -17,3 +17,4 @@ jobs:
           java-version: '25'
           cache: maven
       - run: mvn -B verify
+      - run: docker build -t simuladev .
