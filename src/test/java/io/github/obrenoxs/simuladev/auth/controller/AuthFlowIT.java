@@ -1,9 +1,11 @@
 package io.github.obrenoxs.simuladev.auth.controller;
 
+import com.jayway.jsonpath.JsonPath;
 import io.github.obrenoxs.simuladev.AbstractIntegrationTest;
 import io.github.obrenoxs.simuladev.auth.refresh.repository.RefreshTokenRepository;
 import io.github.obrenoxs.simuladev.email.EmailService;
 import io.github.obrenoxs.simuladev.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
