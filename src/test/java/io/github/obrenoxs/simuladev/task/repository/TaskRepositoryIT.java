@@ -70,6 +70,33 @@ public class TaskRepositoryIT extends AbstractIntegrationTest {
         assertEquals(base.plusHours(1), result.get(2).getCreatedAt());
     }
 
+    @Test
+    void findTop3ShouldIgnoreTasksFromOtherCompanyLinks() {
+
+        User user = userRepository.save(new User(null, "UserTest", "it-user@example.com",
+                "Java + Spring", "ESTAGIARIO", 0, UserRole.USER, "hash"));
+
+        CompanyType companyType = companyTypeRepository.findAll().get(0);
+
+        Concept concept = conceptRepository.findAll().get(0);
+
+        CompanyLink linkA = companyLinkRepository.save(new CompanyLink(null, "Company A",
+                LocalDate.now(), true, user, companyType));
+
+        CompanyLink linkB = companyLinkRepository.save(new CompanyLink(null, "Company B",
+                LocalDate.now(), true, user, companyType));
+
+        LocalDateTime base = LocalDateTime.of(2026, 1, 1, 10, 0);
+
+        taskRepository.save(buildTask(linkA, concept, base));
+        taskRepository.save(buildTask(linkB, concept, base.plusHours(5)));
+
+        List<Task> result = taskRepository.findTop3ByCompanyLinkIdOrderByCreatedAtDesc(linkA.getId());
+
+        assertEquals(1, result.size());
+        assertEquals(linkA.getId(), result.get(0).getCompanyLink().getId());
+    }
+
     private Task buildTask(CompanyLink companyLink, Concept concept, LocalDateTime createdAt) {
         Task task = new Task();
         task.setCompanyLink(companyLink);
