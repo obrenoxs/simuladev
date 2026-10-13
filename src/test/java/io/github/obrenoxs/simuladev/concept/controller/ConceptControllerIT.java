@@ -33,4 +33,21 @@ public class ConceptControllerIT extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(3));
     }
+
+    @Test
+    void findAllShouldReturnUnauthorizedWhenTokenIsMissing() throws Exception {
+
+        mockMvc.perform(get("/api/v1/concepts"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void findAllShouldReturnUnauthorizedWhenRefreshTokenIsUsedAsBearer() throws Exception {
+
+        String refreshToken = jwtService.generateRefreshToken(UUID.randomUUID());
+
+        mockMvc.perform(get("/api/v1/concepts")
+                        .header("Authorization", "Bearer " + refreshToken))
+                .andExpect(status().isUnauthorized());
+    }
 }
