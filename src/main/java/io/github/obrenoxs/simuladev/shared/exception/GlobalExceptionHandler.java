@@ -7,6 +7,7 @@ import io.github.obrenoxs.simuladev.user.exception.EmailNotVerifiedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -47,6 +48,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<Map<String, Object>> emailNotVerified(EmailNotVerifiedException ex, WebRequest request) {
         return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage(), null, request);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex, WebRequest request) {
+
+        List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> Map.of(
+                        "field", fieldError.getField(),
+                        "message", fieldError.getDefaultMessage()))
+                .toList();
+
+        return buildResponse(HttpStatus.BAD_REQUEST, "Dados inválidos", errors, request);
     }
 
     private ResponseEntity<Map<String, Object>> buildResponse(
