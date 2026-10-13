@@ -1,9 +1,11 @@
 package io.github.obrenoxs.simuladev.auth.service;
 
 import io.github.obrenoxs.simuladev.auth.dto.request.LoginRequest;
+import io.github.obrenoxs.simuladev.auth.dto.request.ResendVerificationRequest;
 import io.github.obrenoxs.simuladev.auth.dto.result.LoginResult;
 import io.github.obrenoxs.simuladev.auth.refresh.entity.RefreshToken;
 import io.github.obrenoxs.simuladev.auth.refresh.service.RefreshTokenService;
+import io.github.obrenoxs.simuladev.email.EmailService;
 import io.github.obrenoxs.simuladev.user.entity.User;
 import io.github.obrenoxs.simuladev.user.enums.UserRole;
 import io.github.obrenoxs.simuladev.user.exception.EmailNotVerifiedException;
@@ -41,6 +43,9 @@ public class AuthServiceTest {
 
     @Mock
     private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private EmailService emailService;
 
     private User user;
     private LoginRequest request;
@@ -265,5 +270,50 @@ public class AuthServiceTest {
         authService.logout(refreshToken);
 
         verify(refreshTokenService).deleteToken(refreshToken);
+    }
+
+    @Test
+    void resendVerificationEmailShouldDoNothingWhenEmailNotFound() {
+
+        ResendVerificationRequest resendRequest = new ResendVerificationRequest("userTest@example.com");
+        String emailRequest = resendRequest.email();
+
+        when(userRepository.findByEmail(emailRequest))
+                .thenReturn(Optional.empty());
+
+        authService.resendVerificationEmail(resendRequest);
+
+        verifyNoInteractions(jwtService, emailService);
+    }
+
+    @Test
+    void resendVerificationEmailShouldDoNothingWhenEmailAlreadyVerified() {
+
+        ResendVerificationRequest resendRequest = new ResendVerificationRequest(user.getEmail());
+
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        authService.resendVerificationEmail(resendRequest);
+
+        verifyNoInteractions(jwtService, emailService);
+    }
+
+    @Test
+    void resendVerificationEmailShouldSendEmailWhenUserIsNotVerified() {
+
+        user.setEmailVerified(false);
+
+        ResendVerificationRequest resendRequest = new ResendVerificationRequest(user.getEmail());
+
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+
+        when(jwtService.generateEmailVerificationToken(user.getId()))
+                .thenReturn("any-token");
+
+        authService.resendVerificationEmail(resendRequest);
+
+        verify(emailService).sendVerificationEmail(user.getEmail(), "any-token");
     }
 }
