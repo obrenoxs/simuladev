@@ -1,3 +1,5 @@
+package io.github.obrenoxs.simuladev;
+
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
