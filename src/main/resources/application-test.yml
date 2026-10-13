@@ -1,5 +1,6 @@
 JWT_SECRET: sjnfdnjfnjdsnfuenujdnshuofnhehfnhuihfeuiejdifjbfcihhbdshbcvhdsbhfdmnk
 GEMINI_API_KEY: fake
-BREVO_SMTP_USERNAME: fake
-BREVO_SMTP_KEY: fake
 MAIL_FROM: test@example.com
+app:
+  brevo:
+    api-key: fake-key

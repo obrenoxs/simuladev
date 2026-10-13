@@ -16,19 +16,8 @@ spring:
       hibernate:
         format_sql: true
 
-  mail:
-    host: smtp-relay.brevo.com
-    port: 587
-    username: ${BREVO_SMTP_USERNAME}
-    password: ${BREVO_SMTP_KEY}
-    properties:
-      mail:
-
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
   mail-from: ${MAIL_FROM}
+  brevo:
+    api-key: ${BREVO_API_KEY}
