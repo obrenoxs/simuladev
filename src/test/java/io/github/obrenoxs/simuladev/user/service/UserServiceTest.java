@@ -3,6 +3,9 @@ package io.github.obrenoxs.simuladev.user.service;
 import io.github.obrenoxs.simuladev.auth.service.JwtService;
 import io.github.obrenoxs.simuladev.email.EmailService;
 import io.github.obrenoxs.simuladev.user.dto.request.UserRequest;
+import io.github.obrenoxs.simuladev.user.dto.response.UserResponse;
+import io.github.obrenoxs.simuladev.user.entity.User;
+import io.github.obrenoxs.simuladev.user.enums.UserRole;
 import io.github.obrenoxs.simuladev.user.exception.EmailAlreadyExistsException;
 import io.github.obrenoxs.simuladev.user.mapper.UserMapper;
 import io.github.obrenoxs.simuladev.user.repository.UserRepository;
@@ -13,6 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 
@@ -51,5 +56,41 @@ public class UserServiceTest {
 
         verifyNoInteractions(passwordEncoder, userMapper, jwtService, emailService);
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void createShouldSaveUserAndSendVerificationEmailWhenEmailIsAvailable() {
+
+        UserRequest request = new UserRequest("UserTest", "userTest@example.com", "12345678");
+
+        String encodedPassword = "encoded-password";
+
+        User user = new User(UUID.randomUUID(), "UserTest", "userTest@example.com", "Java + Spring", "ESTAGIARIO", 0, UserRole.USER, encodedPassword);
+
+        UserResponse response = new UserResponse(user.getId(), user.getName(), user.getEmail());
+
+        when(userRepository.existsByEmail(request.email()))
+                .thenReturn(false);
+
+        when(passwordEncoder.encode("12345678"))
+                .thenReturn(encodedPassword);
+
+        when(userMapper.toEntity(request, encodedPassword))
+                .thenReturn(user);
+
+        when(userRepository.save(user)).
+                thenReturn(user);
+
+        when(jwtService.generateEmailVerificationToken(user.getId()))
+                .thenReturn("emailToken");
+
+        when(userMapper.toResponse(user))
+                .thenReturn(response);
+
+        UserResponse result = userService.create(request);
+
+        Assertions.assertEquals(response, result);
+        verify(emailService).sendVerificationEmail("userTest@example.com", "emailToken");
+        verify(userRepository).save(user);
     }
 }
